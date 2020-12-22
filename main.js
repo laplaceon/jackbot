@@ -24,6 +24,19 @@ var limiter = {
     interval: null,
 }
 
+
+
+function generateStair(){
+    var stair = {
+        direction: Math.floor(Math.random() * 2)
+    }
+    stairs.push(stair)
+    //if there are too many stairs
+    if(stairs.length >= 10){
+        stairs.shift();
+    }
+}
+
 function main(){
 
     limiter.now = new Date().getTime();
