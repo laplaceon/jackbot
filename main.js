@@ -19,7 +19,7 @@ var keymap = {
     down: 40,
     up: 38,
     left: 37,
-    right: 29
+    right: 39
 }
 
 var limiter = {
@@ -54,23 +54,53 @@ function generateStair(){
     }
 }
 
+function drawPlayer(){
+
+    ctx.beginPath()
+    ctx.rect(        
+        (canvas.width/2 + 20) + (player.x * 80),
+        (canvas.height - 80) - (player.y * 80),
+        20,
+        20
+    )
+    ctx.fill();
+    ctx.closePath()
+    
+}
+
+function playerLeft(){
+    player.y += 1;
+    player.x -= 1
+}
+
+function playerRight(){
+    player.y += 1;
+    player.x += 1
+}
+
 function drawStairs(){
 
     stairs.forEach( stair =>{
 
-   
+        ctx.beginPath()
         ctx.rect(        
                 (canvas.width/2 - 20) + (stair.x * 80),
                 (canvas.height - 40) - (stair.y * 80),
                 100,
                 10
         )
+        ctx.fill();
+        ctx.closePath()
         
-        ctx.stroke();
 
     })
 
 }
+
+for(var i = 0; i< 15;i++){
+    generateStair()
+}
+
 
 function main(){
 
@@ -82,7 +112,10 @@ function main(){
         limiter.then = limiter.now - (limiter.delta % limiter.interval)
 
         //exec loop
+        
+        ctx.clearRect(0,0,canvas.width, canvas.height)
         drawStairs()
+        drawPlayer()
         
     }
 
@@ -90,3 +123,13 @@ function main(){
 }
 
 main()
+
+document.addEventListener("keydown",(e)=>{
+    console.log(e)
+    if(e.keyCode == keymap.left){
+        playerLeft()
+    }
+    else if(e.keyCode == keymap.right){
+        playerRight()
+    }
+})
