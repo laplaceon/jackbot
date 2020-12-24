@@ -1,0 +1,17 @@
+*{
+    margin:0;
+    padding:0
+}
+
+
+#mobileControls{
+    
+    position:absolute;
+    width:calc(100%);
+    bottom: 3em;
+    display:none;
+    grid-template-columns: auto auto;
+}
+#mobileControls button{
+    height:3em;
+}
