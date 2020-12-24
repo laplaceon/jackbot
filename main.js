@@ -144,6 +144,14 @@ for(var i = 0; i< 15;i++){
     generateStair()
 }
 
+function drawScore(){
+    ctx.beginPath()
+    ctx.font = '18px serif';
+    ctx.fillText('Score: ', 5, canvas.height - 28);
+    ctx.fillText(player.score, 55, canvas.height - 28);
+    ctx.closePath()
+}
+
 
 function main(){
 
@@ -164,6 +172,7 @@ function main(){
         drawHealth()
         drawStairs()
         drawPlayer()
+        drawScore()
 
         
         
@@ -197,6 +206,7 @@ function moveCameraY(){
 main()
 
 function move(){
+    player.score += 5
     player.endurance += (player.stair * .5)
     if(player.endurance >= 100){
         player.endurance = 100;
