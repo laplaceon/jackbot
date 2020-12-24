@@ -6,7 +6,8 @@ var player = {
     y:0,
     score:0,
     stair:0,
-    direction: 1
+    direction: 1,
+    endurance: 100,
 }
 
 var camera = {
@@ -98,6 +99,18 @@ function playerRight(){
     generateStair()
 }
 
+function drawHealth(){
+    ctx.beginPath()
+    ctx.rect(        
+            0,
+            canvas.height - 20,
+            player.endurance *2,
+            20
+    )
+    ctx.fill();
+    ctx.closePath()
+}
+
 function drawStairs(){
 
     stairs.forEach( stair =>{
@@ -117,6 +130,14 @@ function drawStairs(){
 
 }
 
+function drain(){
+    player.endurance -= (player.stair * .0175) 
+    if(player.endurance <= 0){
+        alert("game over!")
+        reset()
+    }
+}
+
 for(var i = 0; i< 15;i++){
     generateStair()
 }
@@ -132,10 +153,16 @@ function main(){
         limiter.then = limiter.now - (limiter.delta % limiter.interval)
 
         //exec loop
+
+        drain()
+        
         
         ctx.clearRect(0,0,canvas.width, canvas.height)
+        drawHealth()
         drawStairs()
         drawPlayer()
+
+        
         
     }
 
@@ -145,6 +172,10 @@ function main(){
 main()
 
 function move(){
+    player.endurance += (player.stair * .5)
+    if(player.endurance >= 100){
+        player.endurance = 100;
+    }
     if(player.direction){
         playerLeft()
     }else{
@@ -166,7 +197,8 @@ function reset(){
         y:0,
         score:0,
         stair:0,
-        direction: 0
+        direction: 0,
+        endurance: 100
     }
     camera = {
         x:0,
@@ -181,8 +213,6 @@ document.addEventListener("keydown",(e)=>{
 
     if(e.keyCode == keymap.space){
         player.stair ++;
-        console.log("player: " +player.direction)
-        console.log("stairs: " +stairs[player.stair].direction)
 
         if(player.direction == stairs[player.stair].direction){
             alert("gameover")
@@ -197,8 +227,6 @@ document.addEventListener("keydown",(e)=>{
         
         player.stair ++;      
         player.direction ? player.direction = 0 : player.direction = 1;
-        console.log("player: " +player.direction)
-        console.log("stairs: " +stairs[player.stair].direction)
         if(player.direction == stairs[player.stair].direction){
             alert("gameover")
             reset()
