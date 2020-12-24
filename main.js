@@ -13,6 +13,8 @@ var player = {
 var camera = {
     x:0,
     y:-80,
+    xTarget:0,
+    yTarget:-80
 }
 var stairs = [
     {
@@ -80,8 +82,8 @@ function drawPlayer(){
 }
 
 function playerLeft(){
-    camera.y += 80;
-    camera.x += 80;
+    camera.yTarget += 80;
+    camera.xTarget += 80;
 
     player.y += 1;
     player.x -= 1
@@ -90,8 +92,8 @@ function playerLeft(){
 }
 
 function playerRight(){
-    camera.y += 80;
-    camera.x -= 80;
+    camera.yTarget += 80;
+    camera.xTarget -= 80;
 
     player.y += 1;
     player.x += 1
@@ -156,7 +158,8 @@ function main(){
 
         drain()
         
-        
+        moveCameraY()
+        moveCameraX()
         ctx.clearRect(0,0,canvas.width, canvas.height)
         drawHealth()
         drawStairs()
@@ -167,6 +170,28 @@ function main(){
     }
 
     requestAnimationFrame(main);
+}
+
+function moveCameraX(){
+    if(camera.x == camera.xTarget ){
+        return
+    }
+    if(camera.x > camera.xTarget){
+        camera.x -= 8
+    }else{
+        camera.x += 8
+    }
+}
+
+function moveCameraY(){
+    if(camera.y == camera.yTarget ){
+        return
+    }
+    if(camera.y > camera.yTarget){
+        camera.y -= 8
+    }else{
+        camera.y += 8
+    }
 }
 
 main()
@@ -203,6 +228,8 @@ function reset(){
     camera = {
         x:0,
         y:-80,
+        xTarget:0,
+        yTarget:-80
     }
     for(var i = 0; i< 15;i++){
         generateStair()
