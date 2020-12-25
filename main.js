@@ -123,6 +123,14 @@ function drawHealth(){
     )
     ctx.fill();
     ctx.closePath()
+
+    ctx.beginPath()
+    ctx.fillStyle = "grey"
+    ctx.font = '18px serif';
+    ctx.fillText('Endurance', 55, canvas.height -5);
+    ctx.fillStyle = "black"
+    ctx.closePath()
+
 }
 
 function drawStairs(){
