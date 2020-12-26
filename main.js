@@ -39,7 +39,19 @@ class Renderer{
 
     addBackground(obj){
         //TODO: add sanatize
-        this.actors.push(obj)
+        this.background.push(obj)
+    }
+
+    getActorsLength(){
+        return this.actors.length
+    }
+
+    getBackgroundLength(){
+        return this.background.length
+    }
+
+    clearBackgrounds(){
+        this.background = []
     }
 
     render(){
@@ -57,6 +69,7 @@ class Renderer{
             //clearScreen
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
 
+            this.camera.centerCamera( this.actors[0] , this.canvas)
             this.camera.moveCamera()
 
             this.background.forEach( object =>{
@@ -88,6 +101,7 @@ class Player{
     direction
     endurance
     aspect
+    stair
 
     constructor(){
 
@@ -100,7 +114,21 @@ class Player{
         this.direction = 1;
         this.endurance = 100;
         this.aspect = false;
+        this.stair = 0;
 
+    }
+
+    reset(){
+        this.width = 20;
+        this.height = 20;
+        this.x = 0;
+        this.y = 0;
+        this.score = 0;
+        this.stair = 0;
+        this.direction = 1;
+        this.endurance = 100;
+        this.aspect = false;
+        this.stair = 0;
     }
 
     assignSprite(path){
@@ -111,13 +139,17 @@ class Player{
         this.aspect = this.width / this.height
     }
 
+    changeDirection(){
+        this.direction ? this.direction = 0 : this.direction = 1;
+    }
+
     render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
 
         if(!this.aspect){
             context.beginPath()
             context.rect(        
-                camera.x + (canvas.width/2 + 20) + (this.x * 80),
-                camera.y + (canvas.height - 80) - (this.y * 80),
+                camera.x + (this.x),
+                camera.y + (this.y),
                 this.width,
                 this.height
             )
@@ -128,8 +160,8 @@ class Player{
             context.beginPath()
             context.drawImage(
                 this.sprite,
-                camera.x + (canvas.width/2 + 20) + (this.x * 80),
-                camera.y + (canvas.height - 80) - (this.y * 80),
+                camera.x + (this.x),
+                camera.y + (this.y),
                 this.width,
                 this.width / this.aspect
             )
@@ -166,6 +198,16 @@ class Camera{
         this.targetY = cords.y
     }
 
+    centerCamera( object , canvas){
+        this.setCamera(
+            {
+                x: ((canvas.width/2 - (object.width/2)) - object.x ),
+                y: ((canvas.height/2 - (object.height/2)) - object.y )
+            }
+
+        )
+    }
+
     setSpeed(value){
         if(typeof value != 'number') return false;
         this.speed = value
@@ -176,17 +218,17 @@ class Camera{
         if(this.x == this.targetX ){
             this.velX = 0
         }else if(this.x > this.targetX){
-            this.velX = -Math.floor(Math.abs(this.targetX-  this.x) / this.speed)
+            this.velX = -Math.floor(Math.abs(this.targetX-  this.x) / 2)
         }else if(this.x < this.targetX){
-            this.velX = Math.floor(Math.abs(this.targetX-  this.x) / this.speed)
+            this.velX = Math.floor(Math.abs(this.targetX-  this.x) / 2)
         }
 
         if(this.y == this.targetY ){
             this.velY = 0
         }else if(this.y > this.targetY){
-            this.velY = -Math.floor(Math.abs(this.targetY -  this.y) / this.speed)
+            this.velY = -Math.floor(Math.abs(this.targetY -  this.y) / 2)
         }else if(this.y < this.targetY){
-            this.velY = Math.floor(Math.abs(this.targetY -  this.y) / this.speed)
+            this.velY = Math.floor(Math.abs(this.targetY -  this.y) / 2)
         }
 
         this.x += this.velX
@@ -196,10 +238,173 @@ class Camera{
 
 }
 
-class Background{
+class Stair extends Player{
+
+    constructor(x = 0 , y = 0 , direction = (Math.floor(Math.random() * 2)), player, width){
+        super()
+        this.direction = direction;
+        
+
+        this.width = width
+
+        this.x = x - (this.width/2 - (player.width/2));
+        this.y = y;
+    }
 
 }
 
-var renderer = new Renderer()
-renderer.addActor(new Player())
-renderer.render()
+class Input {
+
+    inputs
+
+    constructor(){
+        this.inputs = []
+    }
+
+    bind(keyCode, callback = ()=>{
+        console.log("empty bind")
+    }){
+        document.addEventListener("keydown", (e)=>{
+            if(e.keyCode == keyCode){
+                callback()
+            }
+        })
+        
+    }
+
+}
+
+class Main {
+
+    renderer
+    player
+    stairs
+    settings
+    inputHandler
+
+    constructor(){
+        this.renderer = new Renderer()
+        this.player = new Player()
+        this.renderer.addActor(this.player)
+        this.inputHandler = new Input()
+        this.stairs = [
+            {
+                direction: 0,
+                x:0,
+                y:0
+            }
+        ]
+
+        this.renderer.render()
+
+        this.settings = {
+            stairsWidth: 100,
+            stairsSpacingY: 100,
+            stairsSpacingX: 80,
+
+        }
+        
+        for(var i = 0; i < 20; i++){
+            this.createStair()
+        }
+
+        this.inputHandler.bind(32, ()=>{
+            
+            this.movePlayer(this.player.direction)
+            this.checkStair()
+            this.createStair()
+        })
+
+        this.inputHandler.bind(17, ()=>{
+            this.player.changeDirection()
+            this.movePlayer(this.player.direction)
+            this.checkStair()
+            this.createStair()
+        })
+        
+    }
+
+    createStair(){
+
+        var direction = Math.floor(Math.random() * 2);
+        var x = 0;
+        var y = -(this.renderer.getBackgroundLength() * this.settings.stairsSpacingY) + 30
+
+        if(this.stairs.length == 1){
+            //this is the first stair
+            x = 0
+        }else{
+            
+            if(direction){
+                x = this.stairs[this.stairs.length-1].x + this.settings.stairsSpacingX
+            }else{
+                x = this.stairs[this.stairs.length-1].x - this.settings.stairsSpacingX
+            }
+
+        }
+
+
+        this.stairs.push({
+            direction: direction,
+            x:x,
+            y:y
+        })
+
+        this.renderer.background.push(new Stair( 
+            x,
+            y,
+            direction,
+            this.player,
+            this.settings.stairsWidth
+        ))
+
+    }
+
+    movePlayer(direction){
+
+        if(direction){
+            this.player.x += this.settings.stairsSpacingX
+        }else{ 
+            this.player.x -= this.settings.stairsSpacingX
+        }
+
+        
+        this.player.y -= this.settings.stairsSpacingY
+        this.player.stair ++
+    }
+
+    checkStair(){
+        if(this.player.direction != this.stairs[this.player.stair+1].direction){
+            console.log("failed")
+            this.resetGame()
+        }
+    }
+
+    resetGame(){
+
+        this.stairs = [
+            {
+                direction: 0,
+                x:0,
+                y:0
+            }
+        ]
+        this.renderer.clearBackgrounds()
+        for(var i = 0; i < 20; i++){
+            this.createStair()
+        }
+        this.player.reset()
+
+    }
+
+    
+
+
+
+
+}
+//left is 0 : right is 1
+
+var main = new Main()
+
+
