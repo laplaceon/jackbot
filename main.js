@@ -32,6 +32,24 @@ class Renderer{
 
     }
 
+    setGradient(stops ){
+        var grd = {
+            gradient : this.context.createLinearGradient(0, 0, 200, 0),
+        }
+        
+        stops.forEach((stop,i)=>{
+            grd.gradient.addColorStop(i, stop);
+        })
+
+        grd.render = ()=>{
+            this.context.fillStyle = grd;
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
+        //this.background.unshift(grd)
+        
+    }
+
     addActor(obj){
         //TODO: add sanatize
         this.actors.push(obj)
@@ -102,6 +120,7 @@ class Player{
     endurance
     aspect
     stair
+    ready
 
     constructor(){
 
@@ -115,28 +134,29 @@ class Player{
         this.endurance = 100;
         this.aspect = false;
         this.stair = 0;
-
+        this.ready = false;
     }
 
     reset(){
-        this.width = 20;
-        this.height = 20;
         this.x = 0;
         this.y = 0;
         this.score = 0;
-        this.stair = 0;
+        this.stair = 0; 
         this.direction = 1;
         this.endurance = 100;
-        this.aspect = false;
         this.stair = 0;
     }
 
     assignSprite(path){
         this.sprite = new Image();
         this.sprite.src = path;
-        this.width = sprite.width;
-        this.height = sprite.height;
+        this.width = this.sprite.width;
+        this.height = this.sprite.height;
         this.aspect = this.width / this.height
+
+        this.sprite.onload = ()=>{
+            this.ready = true
+        }
     }
 
     changeDirection(){
@@ -145,7 +165,7 @@ class Player{
 
     render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
 
-        if(!this.aspect){
+        if(this.ready == false){
             context.beginPath()
             context.rect(        
                 camera.x + (this.x),
@@ -157,6 +177,7 @@ class Player{
             context.closePath()
 
         }else{
+            if(this.ready == false) return false;
             context.beginPath()
             context.drawImage(
                 this.sprite,
@@ -283,52 +304,57 @@ class Main {
     inputHandler
 
     constructor(){
+        //init the renderer 
         this.renderer = new Renderer()
-        this.player = new Player()
-        this.renderer.addActor(this.player)
-        this.inputHandler = new Input()
-        this.stairs = [
-            {
-                direction: 0,
-                x:0,
-                y:0
-            }
-        ]
 
-        this.renderer.render()
 
+        //setup gamestate
         this.settings = {
             stairsWidth: 100,
-            stairsSpacingY: 100,
+            stairsSpacingY: 120,
             stairsSpacingX: 80,
-
+            playerSprite: "img/cat.png",
+            stairSprite: "img/stair.png"
         }
         
-        for(var i = 0; i < 20; i++){
-            this.createStair()
-        }
 
-        this.inputHandler.bind(32, ()=>{
-            
+        //create player and setup sprite
+        this.player = new Player()
+        this.player.assignSprite(this.settings.playerSprite)
+
+
+        this.renderer.addActor(this.player)
+
+        //setup background objects
+        this.renderer.setGradient([
+            "red","blue"
+        ] )
+
+        //input handling and binding
+        this.inputHandler = new Input()
+        this.inputHandler.bind(32, ()=>{ //Spacebar - Move up
             this.movePlayer(this.player.direction)
             this.checkStair()
             this.createStair()
         })
 
-        this.inputHandler.bind(17, ()=>{
+        this.inputHandler.bind(17, ()=>{ //Ctrl - Change direction and move up
             this.player.changeDirection()
             this.movePlayer(this.player.direction)
             this.checkStair()
             this.createStair()
         })
         
+        //start the loop
+        this.resetGame()
+        this.renderer.render()
     }
 
     createStair(){
 
         var direction = Math.floor(Math.random() * 2);
         var x = 0;
-        var y = -(this.renderer.getBackgroundLength() * this.settings.stairsSpacingY) + 30
+        var y = -(this.renderer.getBackgroundLength() * this.settings.stairsSpacingY) + this.player.height
 
         if(this.stairs.length == 1){
             //this is the first stair
@@ -350,13 +376,18 @@ class Main {
             y:y
         })
 
-        this.renderer.background.push(new Stair( 
+        var stair = new Stair( 
             x,
             y,
             direction,
             this.player,
             this.settings.stairsWidth
-        ))
+        )
+
+        stair.assignSprite(this.settings.stairSprite)
+        this.renderer.background.push(stair)
+
+
 
     }
 
@@ -398,10 +429,6 @@ class Main {
     }
 
     
-
-
-
-
 }
 //left is 0 : right is 1
 
