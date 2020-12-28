@@ -3,7 +3,9 @@
     padding:0
 }
 
-
+canvas{
+    background: linear-gradient(180deg, rgba(82,82,205,1) 0%, rgba(0,212,255,1) 71%);
+}
 #mobileControls{
     
     position:absolute;
