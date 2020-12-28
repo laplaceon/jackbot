@@ -1,3 +1,8 @@
+document.addEventListener('DOMContentLoaded', (event) => {
+    console.log(event)
+    var main = new Main()
+})
+
 class Renderer{
 
     canvas
@@ -7,6 +12,7 @@ class Renderer{
     actors
     background
     foreground
+    ready
 
     constructor(camera = new Camera()){
 
@@ -28,25 +34,11 @@ class Renderer{
         this.actors = [] ;
         this.background = []; 
         this.foreground = [];
-
+        this.ready = false;
 
     }
 
     setGradient(stops ){
-        var grd = {
-            gradient : this.context.createLinearGradient(0, 0, 200, 0),
-        }
-        
-        stops.forEach((stop,i)=>{
-            grd.gradient.addColorStop(i, stop);
-        })
-
-        grd.render = ()=>{
-            this.context.fillStyle = grd;
-            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-
-        //this.background.unshift(grd)
         
     }
 
@@ -72,17 +64,30 @@ class Renderer{
         this.background = []
     }
 
+    checkReady(){
+        var status = true
+        this.actors.forEach( actor =>{
+            if(!actor.isReady()){
+                status = false;
+            }
+        })
+        this.ready = status
+    }
+
     render(){
 
         this.limiter.now = new Date().getTime();
         this.limiter.delta = this.limiter.now - this.limiter.then;
-
-
-        if(this.limiter.delta > this.limiter.interval  ){
+        
+       
+        
+        if(this.limiter.delta > this.limiter.interval ){
             this.limiter.then = this.limiter.now - (this.limiter.delta % this.limiter.interval)
             this.canvas.width = window.innerWidth - 18;
             this.canvas.height = window.innerHeight;
             //exec loop
+
+            this.checkReady()
 
             //clearScreen
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
@@ -90,15 +95,20 @@ class Renderer{
             this.camera.centerCamera( this.actors[0] , this.canvas)
             this.camera.moveCamera()
 
-            this.background.forEach( object =>{
-                object.render(this.context, this.camera, this.canvas);
-            })
-            this.actors.forEach( object =>{
-                object.render(this.context, this.camera, this.canvas);
-            })
-            this.foreground.forEach( object =>{
-                object.render(this.context, this.camera, this.canvas);
-            })
+            if(this.ready){
+                console.log("hit")
+                this.background.forEach( object =>{
+                    object.render(this.context, this.camera, this.canvas);
+                })
+                this.actors.forEach( object =>{
+                    object.render(this.context, this.camera, this.canvas);
+                })
+                this.foreground.forEach( object =>{
+                    object.render(this.context, this.camera, this.canvas);
+                })
+            }
+            
+            
         
         }
 
@@ -149,14 +159,18 @@ class Player{
 
     assignSprite(path){
         this.sprite = new Image();
-        this.sprite.src = path;
-        this.width = this.sprite.width;
-        this.height = this.sprite.height;
-        this.aspect = this.width / this.height
 
         this.sprite.onload = ()=>{
             this.ready = true
         }
+        this.sprite.src = path;
+        this.width = this.sprite.width;
+        this.height = this.sprite.height;
+        this.aspect = this.width / this.height
+    }
+
+    isReady(){
+        return this.ready;
     }
 
     changeDirection(){
@@ -166,6 +180,9 @@ class Player{
     render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
 
         if(this.ready == false){
+            console.log(
+                "not ready"
+            )
             context.beginPath()
             context.rect(        
                 camera.x + (this.x),
@@ -177,17 +194,13 @@ class Player{
             context.closePath()
 
         }else{
-            if(this.ready == false) return false;
-            context.beginPath()
-            context.drawImage(
-                this.sprite,
-                camera.x + (this.x),
-                camera.y + (this.y),
-                this.width,
-                this.width / this.aspect
-            )
-            context.fill();
-            context.closePath()
+                context.drawImage(
+                    this.sprite,
+                    camera.x + (this.x),
+                    camera.y + (this.y),
+                    this.width,
+                    this.width / this.aspect
+                )    
         }
         
     }
@@ -265,7 +278,6 @@ class Stair extends Player{
         super()
         this.direction = direction;
         
-
         this.width = width
 
         this.x = x - (this.width/2 - (player.width/2));
@@ -291,6 +303,26 @@ class Input {
             }
         })
         
+    }
+
+}
+
+class ProgressBar{
+
+    x
+    y
+    width
+    height
+    percent
+
+    constructor(x = 0, y  = 0, width = 100, height = 20, percent = 100){
+
+
+
+    }
+
+    render(){
+
     }
 
 }
@@ -346,6 +378,7 @@ class Main {
         })
         
         //start the loop
+        this.renderer.checkReady()
         this.resetGame()
         this.renderer.render()
     }
@@ -432,6 +465,6 @@ class Main {
 }
 //left is 0 : right is 1
 
-var main = new Main()
+
 
 
