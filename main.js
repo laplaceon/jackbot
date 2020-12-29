@@ -96,7 +96,6 @@ class Renderer{
             this.camera.moveCamera()
 
             if(this.ready){
-                console.log("hit")
                 this.background.forEach( object =>{
                     object.render(this.context, this.camera, this.canvas);
                 })
@@ -125,12 +124,13 @@ class Player{
     y
     width
     height
-    sprite
+    sprites
     direction
     endurance
     aspect
     stair
     ready
+    frame
 
     constructor(){
 
@@ -145,6 +145,8 @@ class Player{
         this.aspect = false;
         this.stair = 0;
         this.ready = false;
+        this.sprites = []
+        this.frame = 0;
     }
 
     reset(){
@@ -155,18 +157,25 @@ class Player{
         this.direction = 1;
         this.endurance = 100;
         this.stair = 0;
+        this.frame = 0;
     }
 
-    assignSprite(path){
-        this.sprite = new Image();
+    addSprite(path){
+        var sprite = new Image();
 
-        this.sprite.onload = ()=>{
+        sprite.onload = ()=>{
             this.ready = true
+            
+            this.width = sprite.width;
+            this.height = sprite.height;
+            this.aspect = this.width / this.height
+            this.sprites.push(sprite)
         }
-        this.sprite.src = path;
-        this.width = this.sprite.width;
-        this.height = this.sprite.height;
-        this.aspect = this.width / this.height
+
+        sprite.src = path;
+        
+
+        
     }
 
     isReady(){
@@ -175,14 +184,14 @@ class Player{
 
     changeDirection(){
         this.direction ? this.direction = 0 : this.direction = 1;
+        if(this.sprites.length >= 2){
+            this.frame ? this.frame = 0 : this.frame = 1;
+        }
     }
 
     render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
 
         if(this.ready == false){
-            console.log(
-                "not ready"
-            )
             context.beginPath()
             context.rect(        
                 camera.x + (this.x),
@@ -194,13 +203,24 @@ class Player{
             context.closePath()
 
         }else{
+            if(this.direction){
                 context.drawImage(
-                    this.sprite,
+                    this.sprites[this.frame],
                     camera.x + (this.x),
                     camera.y + (this.y),
                     this.width,
                     this.width / this.aspect
                 )    
+            }else{
+                context.drawImage(
+                    this.sprites[this.frame],
+                    camera.x + (this.x),
+                    camera.y + (this.y),
+                    this.width,
+                    this.width / this.aspect
+                )    
+            }
+                
         }
         
     }
@@ -345,14 +365,14 @@ class Main {
             stairsWidth: 100,
             stairsSpacingY: 120,
             stairsSpacingX: 80,
-            playerSprite: "img/cat.png",
             stairSprite: "img/stair.png"
         }
         
 
         //create player and setup sprite
         this.player = new Player()
-        this.player.assignSprite(this.settings.playerSprite)
+        this.player.addSprite("img/catR.png")
+        this.player.addSprite("img/catL.png")
 
 
         this.renderer.addActor(this.player)
@@ -417,7 +437,7 @@ class Main {
             this.settings.stairsWidth
         )
 
-        stair.assignSprite(this.settings.stairSprite)
+        stair.addSprite(this.settings.stairSprite)
         this.renderer.background.push(stair)
 
 
