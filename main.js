@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log(event)
-    var main = new Main()
+    
 })
 
 class Renderer{
@@ -50,6 +50,11 @@ class Renderer{
     addBackground(obj){
         //TODO: add sanatize
         this.background.push(obj)
+    }
+
+    addForeground(obj){
+        //TODO: add sanatize
+        this.foreground.push(obj)
     }
 
     getActorsLength(){
@@ -106,6 +111,8 @@ class Renderer{
                     object.render(this.context, this.camera, this.canvas);
                 })
             }
+
+            this.actors[0].checkEndurance()
             
             
         
@@ -141,7 +148,7 @@ class Player{
         this.score = 0;
         this.stair = 0;
         this.direction = 1;
-        this.endurance = 100;
+        this.endurance = null
         this.aspect = false;
         this.stair = 0;
         this.ready = false;
@@ -155,7 +162,7 @@ class Player{
         this.score = 0;
         this.stair = 0; 
         this.direction = 1;
-        this.endurance = 100;
+        this.endurance.setValue(100);
         this.stair = 0;
         this.frame = 0;
     }
@@ -163,7 +170,7 @@ class Player{
     addSprite(path){
         var sprite = new Image();
 
-        sprite.onload = ()=>{
+        sprite.onload = (e)=>{
             this.ready = true
             
             this.width = sprite.width;
@@ -173,13 +180,22 @@ class Player{
         }
 
         sprite.src = path;
-        
-
-        
     }
 
     isReady(){
         return this.ready;
+    }
+
+    checkEndurance(){
+        var endurance = this.endurance.getValue();
+        endurance -= (this.stair * .0175) 
+        if(endurance <= 0){
+            //this isnt great, but its the only way to reset the game
+            main.resetGame();
+        }else{
+            this.endurance.setValue(endurance)
+        }
+        
     }
 
     changeDirection(){
@@ -334,15 +350,46 @@ class ProgressBar{
     width
     height
     percent
+    gradient
 
     constructor(x = 0, y  = 0, width = 100, height = 20, percent = 100){
 
-
-
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.percent = percent;
     }
 
-    render(){
+    setGradient(arr, context){
+        this.gradient = context.createLinearGradient(0, 0, 100,0);
+        arr.forEach( (color,i) =>{
+            this.gradient.addColorStop((i+1) / arr.length, color);
+        })
+    }
 
+    setValue(value){
+        this.percent = value
+    }
+
+    getValue(){
+        return this.percent
+    }
+
+    render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
+        context.beginPath()
+        context.save()
+
+        context.fillStyle = this.gradient
+        context.rect(        
+            (this.x),
+            (this.y),
+            (this.width * this.percent) / this.width * 2,
+            this.height
+        )
+        context.fill();
+        context.closePath()
+        context.restore()
     }
 
 }
@@ -365,7 +412,8 @@ class Main {
             stairsWidth: 100,
             stairsSpacingY: 120,
             stairsSpacingX: 80,
-            stairSprite: "img/stair.png"
+            stairSprite: "img/stair.png",
+            endurance: null
         }
         
 
@@ -381,6 +429,9 @@ class Main {
         this.renderer.setGradient([
             "red","blue"
         ] )
+        this.player.endurance = new ProgressBar(0, 0, 400, 20, 100)
+        this.renderer.addForeground(this.player.endurance)
+        this.player.endurance.setGradient(["rgba(255,0,84,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(82,205,97,1)","rgba(82,205,97,1)","rgba(82,205,97,1)"], this.renderer.context)
 
         //input handling and binding
         this.inputHandler = new Input()
@@ -397,10 +448,12 @@ class Main {
             this.createStair()
         })
         
-        //start the loop
-        this.renderer.checkReady()
-        this.resetGame()
-        this.renderer.render()
+        //start the loop    
+        setTimeout(()=>{
+            this.renderer.render()
+            this.resetGame()
+        }, 50); //TODO: replace this horrid solution to wait till things loaded
+        
     }
 
     createStair(){
@@ -440,7 +493,7 @@ class Main {
         stair.addSprite(this.settings.stairSprite)
         this.renderer.background.push(stair)
 
-
+        
 
     }
 
@@ -455,6 +508,12 @@ class Main {
         
         this.player.y -= this.settings.stairsSpacingY
         this.player.stair ++
+        var endurance = this.player.endurance.getValue()
+        endurance += (this.player.stair * .5)
+        if(endurance >= 100){
+            endurance = 100;
+        }
+        this.player.endurance.setValue(endurance) 
     }
 
     checkStair(){
@@ -486,5 +545,5 @@ class Main {
 //left is 0 : right is 1
 
 
-
+var main = new Main()
 
