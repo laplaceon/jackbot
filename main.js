@@ -84,12 +84,10 @@ class Renderer{
         this.limiter.now = new Date().getTime();
         this.limiter.delta = this.limiter.now - this.limiter.then;
         
-       
-        
         if(this.limiter.delta > this.limiter.interval ){
             this.limiter.then = this.limiter.now - (this.limiter.delta % this.limiter.interval)
-            this.canvas.width = window.innerWidth - 18;
-            this.canvas.height = window.innerHeight;
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight-200;
             //exec loop
 
             this.checkReady()
@@ -334,6 +332,8 @@ class Input {
         console.log("empty bind")
     }){
         document.addEventListener("keydown", (e)=>{
+            e.preventDefault()
+            //yeah yeah its deperacated, TODO: change this
             if(e.keyCode == keyCode){
                 callback()
             }
@@ -362,7 +362,7 @@ class ProgressBar{
     }
 
     setGradient(arr, context){
-        this.gradient = context.createLinearGradient(0, 0, 100,0);
+        this.gradient = context.createLinearGradient(0, 0, 150,0);
         arr.forEach( (color,i) =>{
             this.gradient.addColorStop((i+1) / arr.length, color);
         })
@@ -431,7 +431,7 @@ class Main {
         ] )
         this.player.endurance = new ProgressBar(0, 0, 400, 20, 100)
         this.renderer.addForeground(this.player.endurance)
-        this.player.endurance.setGradient(["rgba(255,0,84,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(82,205,97,1)","rgba(82,205,97,1)","rgba(82,205,97,1)"], this.renderer.context)
+        this.player.endurance.setGradient(["rgba(255,0,84,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(255,254,0,1)","rgba(82,205,97,1)"], this.renderer.context)
 
         //input handling and binding
         this.inputHandler = new Input()
