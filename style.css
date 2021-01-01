@@ -12,18 +12,22 @@ canvas{
 }
 
 #mobileControls{
-    
+
     position:absolute;
     width:calc(100%);
-    bottom: 3em;
-    display:none;
+    bottom: 120px;
+    z-index: 2;
+    
     grid-template-columns: auto auto;
 }
+
 #mobileControls button{
     height:3em;
+    width:10em;
 }
 
 .trans-box{
     background: rgba(0,0,0,.8);
     color:white
 }
+

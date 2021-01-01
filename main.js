@@ -13,6 +13,7 @@ class Renderer{
     background
     foreground
     ready
+    mobile
 
     constructor(camera = new Camera()){
 
@@ -35,7 +36,14 @@ class Renderer{
         this.background = []; 
         this.foreground = [];
         this.ready = false;
+        this.mobile = false;
 
+    }
+
+    checkMobile(){
+
+        this.mobile = typeof window.orientation !== 'undefined';
+        return this.mobile;
     }
 
     setGradient(stops ){
@@ -87,7 +95,13 @@ class Renderer{
         if(this.limiter.delta > this.limiter.interval ){
             this.limiter.then = this.limiter.now - (this.limiter.delta % this.limiter.interval)
             this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight-200;
+
+            if(this.mobile){
+                this.canvas.height = window.innerHeight-100;
+            }else{
+                this.canvas.height = window.innerHeight-200;
+            }
+            
             //exec loop
 
             this.checkReady()
@@ -331,15 +345,29 @@ class Input {
     bind(keyCode, callback = ()=>{
         console.log("empty bind")
     }){
-        document.addEventListener("keydown", (e)=>{
-            e.preventDefault()
-            //yeah yeah its deperacated, TODO: change this
-            if(e.keyCode == keyCode){
+        if(typeof keyCode == "number"){
+            document.addEventListener("keydown", (e)=>{
+                e.preventDefault()
+                //yeah yeah its deperacated, TODO: change this
+                if(e.keyCode == keyCode){
+                    callback()
+                }
+            })
+        }else{
+            var item = document.getElementById(keyCode)
+
+            item.addEventListener("click", (e)=>{
+                e.preventDefault()
+                //yeah yeah its deperacated, TODO: change this
                 callback()
-            }
-        })
+            })
+        }
+        
+        
         
     }
+
+    
 
 }
 
@@ -405,6 +433,11 @@ class Main {
     constructor(){
         //init the renderer 
         this.renderer = new Renderer()
+        
+
+        if(this.renderer.checkMobile()){
+            document.getElementById("mobileControls").style.display = "block"
+        }
 
 
         //setup gamestate
@@ -447,6 +480,19 @@ class Main {
             this.checkStair()
             this.createStair()
         })
+
+        this.inputHandler.bind("upButton", ()=>{ //Spacebar - Move up
+            this.movePlayer(this.player.direction)
+            this.checkStair()
+            this.createStair()
+        })
+
+        this.inputHandler.bind("directionButtton", ()=>{ //Ctrl - Change direction and move up
+            this.player.changeDirection()
+            this.movePlayer(this.player.direction)
+            this.checkStair()
+            this.createStair()
+        })
         
         //start the loop    
         setTimeout(()=>{
@@ -465,6 +511,14 @@ class Main {
         if(this.stairs.length == 1){
             //this is the first stair
             x = 0
+            direction = 0
+        }else if(this.stairs.length == 2){
+            direction = 1
+            if(direction){
+                x = this.stairs[this.stairs.length-1].x + this.settings.stairsSpacingX
+            }else{
+                x = this.stairs[this.stairs.length-1].x - this.settings.stairsSpacingX
+            }
         }else{
             
             if(direction){
