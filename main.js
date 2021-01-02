@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded', (event) => {
-    console.log(event)
-    
-})
 
 class Renderer{
 
@@ -150,6 +146,7 @@ class Player{
     stair
     ready
     frame
+    score
 
     constructor(){
 
@@ -157,7 +154,6 @@ class Player{
         this.height = 20;
         this.x = 0;
         this.y = 0;
-        this.score = 0;
         this.stair = 0;
         this.direction = 1;
         this.endurance = null
@@ -171,12 +167,12 @@ class Player{
     reset(){
         this.x = 0;
         this.y = 0;
-        this.score = 0;
         this.stair = 0; 
         this.direction = 1;
         this.endurance.setValue(100);
         this.stair = 0;
         this.frame = 0;
+        this.score.reset()
     }
 
     addSprite(path){
@@ -208,6 +204,10 @@ class Player{
             this.endurance.setValue(endurance)
         }
         
+    }
+
+    addScore(object){
+        this.score = object
     }
 
     changeDirection(){
@@ -254,6 +254,8 @@ class Player{
     }
 
 }
+
+
 
 class Camera{
 
@@ -422,6 +424,35 @@ class ProgressBar{
 
 }
 
+class Score extends ProgressBar{
+
+    score
+
+    constructor(x = 0, y  = 0){
+        super()
+        this.score = 0
+        this.x = x;
+        this.y = y;
+    }
+
+    addScore(value){
+        this.score += value
+    }
+
+    render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
+        context.beginPath()
+        context.font = '24px serif';
+        context.fillText('Score: ' + this.score, this.x, this.y);
+        context.closePath()
+
+    }
+
+    reset(){
+        this.score = 0
+    }
+
+}
+
 class Main {
 
     renderer
@@ -457,6 +488,8 @@ class Main {
 
 
         this.renderer.addActor(this.player)
+        this.player.addScore(new Score(0,45))
+        this.renderer.addForeground(this.player.score)
 
         //setup background objects
         this.renderer.setGradient([
@@ -567,12 +600,12 @@ class Main {
         if(endurance >= 100){
             endurance = 100;
         }
+        this.player.score.addScore(5)
         this.player.endurance.setValue(endurance) 
     }
 
     checkStair(){
         if(this.player.direction != this.stairs[this.player.stair+1].direction){
-            console.log("failed")
             this.resetGame()
         }
     }
