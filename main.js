@@ -453,6 +453,23 @@ class Score extends ProgressBar{
 
 }
 
+class Overlay extends ProgressBar{
+
+    constructor(x = 0, y  = 0){
+        super()
+        this.x = x;
+        this.y = y;
+    }
+
+    render(context, camera = { x:0 , y:0 }, canvas = { width: 0, height: 0}){
+        context.beginPath()
+        context.font = '24px serif';
+        context.fillText('Game over!', this.x, this.y);
+        context.closePath()
+    }
+
+}
+
 class Main {
 
     renderer
