@@ -175,19 +175,23 @@ class Player{
         this.score.reset()
     }
 
-    addSprite(path){
+    async addSprite(path){
         var sprite = new Image();
 
-        sprite.onload = (e)=>{
-            this.ready = true
-            
-            this.width = sprite.width;
-            this.height = sprite.height;
-            this.aspect = this.width / this.height
-            this.sprites.push(sprite)
-        }
-
-        sprite.src = path;
+        return new Promise((resolve)=>{
+            sprite.src = path;
+            sprite.onload = (e)=>{
+                this.ready = true
+                
+                this.width = sprite.width;
+                this.height = sprite.height;
+                this.aspect = this.width / this.height
+                this.sprites.push(sprite)
+                resolve(sprite)
+            }
+        
+        })
+        
     }
 
     isReady(){
