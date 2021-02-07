@@ -1,5 +1,7 @@
 # Stairs Game
 
+[Play Here](https://jacobgonzalez0.github.io/stairs-game/)
+
 A simple two key stair climbing game
 ![Screenshot](https://lh3.googleusercontent.com/pw/ACtC-3c0IYVViV_FEuRY5sIq9ArVN1jwQuiPD3kKNSrk4PtGJaFdIARgWYCWTVo_yAzaMkJ2Xx85vFg3zgaNyLsvbqfAPaFLfYCVDO3A6Oa0CYttX1Jvvg7muxybqxa4IBNjs97OPl10YD7E4Uv5wOhUvYA=w728-h578-no?authuser=0)
 
