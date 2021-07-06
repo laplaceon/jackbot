@@ -15,5 +15,4 @@ On screen buttons should be available if you're on a mobile device.
 ## About the Project
 Game development from what I hear gets a mixed perspective, and I believe its really engaging because it presents programming problems
 
-that you don't run into in any other circumstances. Its really a good example of creativity and application, causing you to think efficently as you code. A few challenges I experienced with this is getting out of the habbit of hard coding values and rendering, and making objects I can manipulate easier. The inital setup takes some thinking but after making everything follow OOP (Object Oriented Programming), debugging was a breeze. Extending objects made a lot more sense when trying to have a templated way of getting unique properties in a new object.
-
+that you don't run into in any other circumstances. Its really a good example of creativity and application, causing you to think efficiently as you code. A few challenges I experienced with this is getting out of the habit of hard coding values and rendering, and making objects I can manipulate easier. The initial setup takes some thinking but after making everything follow OOP (Object Oriented Programming), debugging was a breeze. Extending objects made a lot more sense when trying to have a templated way of getting unique properties in a new object.
